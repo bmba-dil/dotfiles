@@ -1,0 +1,117 @@
+return {
+	{
+		"stevearc/resession.nvim",
+		lazy = true,
+		opts = {
+			extensions = {
+				oil = {},
+			},
+		},
+	},
+	{
+		"stevearc/oil.nvim",
+		lazy = false,
+		cmd = { "Oil" },
+		keys = {
+			{ "-", "<CMD>Oil<CR>", desc = "Open parent directory" },
+			{
+				"_",
+				function()
+					require("oil").open(vim.fn.getcwd())
+				end,
+				desc = "Open cwd",
+			},
+		},
+		---@module 'oil'
+		---@type oil.SetupOpts
+		opts = {
+			default_file_explorer = true,
+			columns = {
+				"icon",
+				-- "permissions",
+				-- "size",
+				-- "mtime",
+			},
+			-- Buffer-local options to use for oil buffers
+			buf_options = {
+				buflisted = true,
+				bufhidden = "wipe",
+			},
+			delete_to_trash = true,
+			skip_confirm_for_simple_edits = false,
+			prompt_save_on_select_new_entry = false,
+			watch_for_changes = true,
+			win_options = {
+				concealcursor = "n",
+			},
+			keymaps = {
+				["`"] = { "actions.cd", opts = { scope = "tab" }, mode = "n" },
+				["~"] = { "<cmd>edit $HOME<CR>", mode = "n", desc = "Open CWD" },
+				["<leader>y"] = { "actions.copy_to_system_clipboard", mode = { "n", "v" } },
+				["<leader>p"] = "actions.paste_from_system_clipboard",
+				["<leader>t"] = "actions.open_terminal",
+				["<leader>ff"] = {
+					function()
+						local dir = require("oil").get_current_dir()
+						if vim.api.nvim_win_get_config(0).relative ~= "" then
+							vim.api.nvim_win_close(0, true)
+						end
+						require("lazy.core.loader").load("fuzzy-find", { cmd = "Lazy load" })
+						stevearc.find_files({ cwd = dir, hidden = true })
+					end,
+					desc = "[F]ind [F]iles in dir",
+				},
+				["<leader>fg"] = {
+					function()
+						local dir = require("oil").get_current_dir()
+						if vim.api.nvim_win_get_config(0).relative ~= "" then
+							vim.api.nvim_win_close(0, true)
+						end
+						Snacks.picker.grep({ dirs = { dir } })
+					end,
+					desc = "[F]ind by [G]rep in dir",
+				},
+				["gd"] = {
+					desc = "Toggle detail view",
+					callback = function()
+						local oil = require("oil")
+						local config = require("oil.config")
+						if #config.columns == 1 then
+							oil.set_columns({ "icon", "permissions", "size", "mtime" })
+						else
+							oil.set_columns({ "icon" })
+						end
+					end,
+				},
+			},
+			view_options = {
+				show_hidden = true,
+				is_always_hidden = function(name, bufnr)
+					return name == ".."
+				end,
+			},
+		},
+		config = function(_, opts)
+			local oil = require("oil")
+			oil.setup(opts)
+
+			local p = require("p")
+			local ftplugin = p.require("ftplugin")
+			ftplugin.set("oil", {
+				callback = function(bufnr)
+					vim.api.nvim_buf_create_user_command(bufnr, "Save", function(params)
+						oil.save({ confirm = not params.bang })
+					end, {
+						desc = "Save oil changes with a preview",
+						bang = true,
+					})
+					vim.api.nvim_buf_create_user_command(bufnr, "OpenTerminal", function(params)
+						require("oil.adapters.ssh").open_terminal()
+					end, {
+						desc = "Open the debug terminal for ssh connections",
+					})
+				end,
+			})
+		end,
+	},
+}
