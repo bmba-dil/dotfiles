@@ -1,0 +1,68 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false
+
+format = "$directory$os$git_branch$git_status$nodejs$rust$golang$php$python$character"
+
+[os]
+disabled = false
+format = "[$symbol](#E95420) "
+
+[os.symbols]
+Ubuntu = "󰕈"
+Arch   = "󰣇"
+Macos  = ""
+
+[directory]
+truncation_length = 2
+truncate_to_repo  = true
+format = "[$path](cyan) "   # used when NOT in a git repo
+before_repo_root_style = "green"
+repo_root_style        = "bold blue"
+style                  = "cyan"
+repo_root_format = "[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)"
+
+#[directory]
+#format            = "[$path](green) "
+#truncation_length = 2
+#truncate_to_repo  = true
+
+[git_branch]
+symbol = ""
+format = "( [$symbol$branch](italic purple))"
+
+[git_status]
+format     = "($ahead_behind$staged$deleted$conflicted)"
+ahead      = "[⇡$count ](bold cyan)"
+behind     = "[⇣$count ](bold cyan)"
+diverged   = "[⇡$ahead_count⇣$behind_count ](bold cyan)"
+staged     = "[+$count ](bold green)"
+#modified   = "[●$count ](bold yellow)"
+#untracked  = "[?$count ](bold white)"
+deleted    = "[✘$count ](bold red)"
+conflicted = "[⚡$count ](bold red)"
+
+[python]
+symbol = ""
+format = "[$virtualenv](italic yellow)[$symbol](bright-cyan)"
+
+[nodejs]
+symbol = ""
+format = "[$symbol$version](green) "
+
+[rust]
+symbol = ""
+format = "[$symbol$version](red) "
+
+[golang]
+symbol = ""
+format = "[$symbol$version](cyan) "
+
+[php]
+symbol = ""
+format = "[$symbol$version](purple) "
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol   = "[❯](red)"
+vimcmd_symbol  = "[❮](blue)"
